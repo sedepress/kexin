@@ -11,16 +11,13 @@ class LiteratureRequest extends FormRequest
                 return [
                     'name' => 'required|string',
                     'url' => 'required|string',
-                    'image_url' => 'required|string',
+                    'image_url' => 'required',
                     'area_id' => 'required|integer',
                 ];
                 break;
             case 'PATCH':
                 return [
-                    'name' => 'required|string',
-                    'url' => 'required|string',
-                    'image_url' => 'required|string',
-                    'area_id' => 'required|integer',
+                    'status' => 'required|in:up,down',
                 ];
                 break;
         }
@@ -33,6 +30,7 @@ class LiteratureRequest extends FormRequest
             'url' => '网址',
             'image_url' => '图标url',
             'area_id' => '区域id',
+            'status' => '排序状态',
         ];
     }
 }

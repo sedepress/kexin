@@ -46,10 +46,12 @@ $api->version('v1', [
         $api->group(['middleware' => 'api.auth'], function($api) {
             $api->post('literatures', 'LiteratureController@store')
                 ->name('api.literatures.store');
-            $api->patch('literatures/{literature}', 'LiteratureController@update')
+            $api->post('literatures/{literature}', 'LiteratureController@update')
                 ->name('api.literatures.update');
             $api->delete('literatures/{literature}', 'LiteratureController@destroy')
                 ->name('api.literatures.destroy');
+            $api->patch('literatures/{source}/{change}', 'LiteratureController@toggle')
+                ->name('api.literatures.toggle');
         });
     });
 });

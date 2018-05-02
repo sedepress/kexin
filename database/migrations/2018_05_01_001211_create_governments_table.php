@@ -22,6 +22,7 @@ class CreateGovernmentsTable extends Migration
             $table->string('image_url',128)->comment('图标地址');
             $table->integer('area_id')->unsigned()->comment('区域id');
             $table->boolean('status')->default(true)->comment('是否生效');
+            $table->integer('order')->unsigned()->commit('排列顺序');
             $table->timestamps();
         });
     }

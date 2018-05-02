@@ -7,6 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class Literature extends Model
 {
     protected $fillable = [
-        'name', 'url', 'image_url', 'status', 'area_id'
+        'name', 'url', 'image_url', 'status', 'area_id', 'order'
     ];
 }

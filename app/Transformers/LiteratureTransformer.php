@@ -15,6 +15,7 @@ class LiteratureTransformer extends TransformerAbstract
             'url' => $literature->url,
             'image_url' => $literature->image_url,
             'area_id' => $literature->area_id,
+            'order' => $literature->order,
             'created_at' => $literature->created_at->toDateTimeString(),
             'updated_at' => $literature->updated_at->toDateTimeString(),
         ];
