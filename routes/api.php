@@ -37,21 +37,28 @@ $api->version('v1', [
         // 删除token
         $api->delete('authorizations/current', 'AuthorizationsController@destroy')
             ->name('api.authorizations.destroy');
-        // 分类信息
-        $api->get('categories', 'DeclarationCategoryController@index')
-            ->name('api.categories.index');
-        $api->post('categories', 'DeclarationCategoryController@store')
-            ->name('api.categories.store');
         // 需要 token 验证的接口
         $api->group(['middleware' => 'api.auth'], function($api) {
+            // 分类信息
+            $api->get('declaration_categories', 'DeclarationCategoryController@index')
+                ->name('api.categories.index');
+            $api->post('declaration_categories', 'DeclarationCategoryController@store')
+                ->name('api.categories.store');
+            $api->put('declaration_categories/{declaration_category}', 'DeclarationCategoryController@update')
+                ->name('api.categories.update');
+            $api->delete('declaration_categories/{declaration_category}', 'DeclarationCategoryController@delete')
+                ->name('api.categories.delete');
+            //科学文献
             $api->post('literatures', 'LiteratureController@store')
                 ->name('api.literatures.store');
             $api->post('literatures/{literature}', 'LiteratureController@update')
                 ->name('api.literatures.update');
             $api->delete('literatures/{literature}', 'LiteratureController@destroy')
                 ->name('api.literatures.destroy');
-            $api->patch('literatures/{source}/{change}', 'LiteratureController@toggle')
+            $api->patch('literatures/{literature}', 'LiteratureController@toggle')
                 ->name('api.literatures.toggle');
+            $api->get('literatures', 'LiteratureController@index')
+                ->name('api.literatures.index');
         });
     });
 });

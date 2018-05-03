@@ -9,6 +9,12 @@ use App\Handlers\ImageUploadHandler;
 
 class LiteratureController extends Controller
 {
+    public function index(Literature $literature)
+    {
+        $literatures = $literature->orderBy('order')->paginate(2);
+        return $this->response->paginator($literatures, new LiteratureTransformer());
+    }
+
     public function store(LiteratureRequest $request, ImageUploadHandler $uploader, Literature $literature)
     {
         $literature->fill($request->all());
@@ -36,7 +42,7 @@ class LiteratureController extends Controller
 
     public function update(LiteratureRequest $request, ImageUploadHandler $uploader, Literature $literature)
     {
-        $data = $request->all();
+        $data = $request->all();dd($literature);
 
         if ($request->image_url) {
             $result = $uploader->save($request->image_url, 'literatures', $literature->id);
@@ -72,15 +78,26 @@ class LiteratureController extends Controller
         return $this->response->noContent();
     }
 
-    public function toggle(Literature $source, Literature $change)
+    public function toggle(LiteratureRequest $request, Literature $literature)
     {
-        list($source->order, $change->order) = [
-            $change->toArray()['order'],
-            $source->toArray()['order'],
-        ];
-        $change->update();
-        $source->update();
+        $status = $request->status;
 
-        return $this->response->item($source, new LiteratureTransformer());
+        $maxOrder = Literature::max('order');
+        $minOrder = Literature::min('order');
+
+        if ($status == 'up' && $literature->order != $minOrder) {
+            $up = Literature::where('order', '<', $literature->order)->orderBy('order', 'desc')->limit(1)->first();
+            list($literature->order, $up->order) = [$up->order, $literature->order];
+            $up->update();
+        } elseif ($status == 'down' && $literature->order != $maxOrder) {
+            $down = Literature::where('order', '>', $literature->order)->orderBy('order', 'asc')->limit(1)->first();
+            list($literature->order, $down->order) = [$down->order, $literature->order];
+            $down->update();
+        } else {
+            return;
+        }
+        $literature->update();
+
+        return $this->response->item($literature, new LiteratureTransformer());
     }
 }
