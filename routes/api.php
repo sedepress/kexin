@@ -52,6 +52,16 @@ $api->version('v1', [
                 ->name('api.literatures.destroy');
             $api->patch('literatures/{source}/{change}', 'LiteratureController@toggle')
                 ->name('api.literatures.toggle');
+            $api->post('informations', 'InformationController@store')
+                ->name('api.informations.store');
+            $api->post('informations/{information}', 'InformationController@update')
+                ->name('api.informations.update');
+            $api->delete('informations/{information}', 'InformationController@destroy')
+                ->name('api.informations.destroy');
+            $api->patch('informations/{source}/{change}', 'InformationController@toggle')
+                ->name('api.informations.toggle');
+            $api->patch('informations/{information}', 'InformationController@status')
+                ->name('api.informations.status');
         });
     });
 });

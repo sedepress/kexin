@@ -13,6 +13,7 @@
         "laravel/tinker": "~1.0",
         "liyu/dingo-serializer-switch": "^0.3.0",
         "socialiteproviders/weixin": "^4.0",
+        "summerblue/administrator": "~1.1",
         "tymon/jwt-auth": "1.0.0-rc.1",
         "viacreative/sudo-su": "^1.1"
     },
