@@ -20,6 +20,11 @@ class InformationRequest extends FormRequest
                     'status' => 'required|in:yes,no',
                 ];
                 break;
+            case 'PUT':
+                return [
+                    'status' => 'required|in:up,down',
+                ];
+                break;
         }
     }
 
@@ -30,7 +35,6 @@ class InformationRequest extends FormRequest
             'content' => '内容',
             'publisher' => '发布人',
             'image_url' => '图片',
-            'status' => '是否生效',
         ];
     }
 }

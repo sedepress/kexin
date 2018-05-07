@@ -15,6 +15,11 @@ class LiteratureRequest extends FormRequest
                     'area_id' => 'required|integer',
                 ];
                 break;
+            case 'PATCH':
+                return [
+                    'status' => 'required|in:yes,no',
+                ];
+                break;
         }
     }
 

@@ -11,7 +11,7 @@ class LiteratureController extends Controller
 {
     public function index(Literature $literature)
     {
-        $literatures = $literature->orderBy('order')->paginate(2);
+        $literatures = $literature->orderBy('order')->paginate(10);
         return $this->response->paginator($literatures, new LiteratureTransformer());
     }
 
@@ -86,11 +86,11 @@ class LiteratureController extends Controller
         $minOrder = Literature::min('order');
 
         if ($status == 'up' && $literature->order != $minOrder) {
-            $up = Literature::where('order', '<', $literature->order)->orderBy('order', 'desc')->limit(1)->first();
+            $up = Literature::where('order', '<', $literature->order)->orderBy('order', 'desc')->first();
             list($literature->order, $up->order) = [$up->order, $literature->order];
             $up->update();
         } elseif ($status == 'down' && $literature->order != $maxOrder) {
-            $down = Literature::where('order', '>', $literature->order)->orderBy('order', 'asc')->limit(1)->first();
+            $down = Literature::where('order', '>', $literature->order)->orderBy('order', 'asc')->first();
             list($literature->order, $down->order) = [$down->order, $literature->order];
             $down->update();
         } else {

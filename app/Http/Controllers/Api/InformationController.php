@@ -9,6 +9,12 @@ use App\Handlers\ImageUploadHandler;
 
 class InformationController extends Controller
 {
+    public function index(Information $Information)
+    {
+        $Informations = $Information->orderBy('order')->paginate(10);
+        return $this->response->paginator($Informations, new InformationTransformer());
+    }
+
     public function store(InformationRequest $request, ImageUploadHandler $uploader, Information $Information)
     {
         $Information->fill($request->all());
@@ -72,22 +78,32 @@ class InformationController extends Controller
         return $this->response->noContent();
     }
 
-    public function toggle(Information $source, Information $change)
+    public function toggle(InformationRequest $request, Information $information)
     {
-        list($source->order, $change->order) = [
-            $change->toArray()['order'],
-            $source->toArray()['order'],
-        ];
-        $change->update();
-        $source->update();
+        $status = $request->status;
 
-        return $this->response->item($source, new InformationTransformer());
+        $maxOrder = Information::max('order');
+        $minOrder = Information::min('order');
+
+        if ($status == 'up' && $information->order != $minOrder) {
+            $up = Information::where('order', '<', $information->order)->orderBy('order', 'desc')->first();
+            list($information->order, $up->order) = [$up->order, $information->order];
+            $up->update();
+        } elseif ($status == 'down' && $information->order != $maxOrder) {
+            $down = Information::where('order', '>', $information->order)->orderBy('order', 'asc')->first();
+            list($information->order, $down->order) = [$down->order, $information->order];
+            $down->update();
+        } else {
+            return;
+        }
+        $information->update();
+
+        return $this->response->item($information, new InformationTransformer());
     }
 
     public function status(InformationRequest $request, Information $Information)
     {
-        $status = $request->status;
-        $Information->status = $status == 'yes' ? true : false;
+        $Information->status = $request->status == 'yes' ? true : false;
         $Information->update();
 
         return $this->response->item($Information, new InformationTransformer());
