@@ -41,6 +41,7 @@ $api->version('v1', [
         $api->group(['middleware' => 'api.auth'], function($api) {
             //地区相关
             $api->group(['prefix' => 'areas'], function ($api) {
+                $api->get('/{area}', 'AreaController@index');
                 $api->get('first', 'AreaController@first');
                 $api->get('second/{area}', 'AreaController@second');
                 $api->get('three/{area}', 'AreaController@three');
@@ -59,6 +60,14 @@ $api->version('v1', [
                 $api->post('/{literature}', 'LiteratureController@update');
                 $api->delete('/{literature}', 'LiteratureController@destroy');
                 $api->patch('/{literature}', 'LiteratureController@toggle');
+            });
+            //知识产权
+            $api->group(['prefix' => 'intellectuals'], function ($api) {
+                $api->get('/', 'IntellectualController@index');
+                $api->post('/', 'IntellectualController@store');
+                $api->post('/{intellectual}', 'IntellectualController@update');
+                $api->delete('/{intellectual}', 'IntellectualController@destroy');
+                $api->patch('/{intellectual}', 'IntellectualController@toggle');
             });
             //资讯中心
             $api->group(['prefix' => 'informations'], function ($api) {

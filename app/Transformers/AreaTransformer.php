@@ -7,7 +7,7 @@ use League\Fractal\TransformerAbstract;
 
 class AreaTransformer extends TransformerAbstract
 {
-    protected $availableIncludes = ['children'];
+    protected $availableIncludes = ['children', 'literature'];
 
     public function transform(Area $area)
     {
@@ -22,6 +22,11 @@ class AreaTransformer extends TransformerAbstract
     public function includeChildren(Area $area)
     {
         return $this->collection($area->children()->get(), new AreaTransformer());
+    }
+
+    public function includeLiterature(Area $area)
+    {
+        return $this->collection($area->literatures()->get(), new LiteratureTransformer());
     }
 
 }

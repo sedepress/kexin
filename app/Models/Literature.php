@@ -10,4 +10,9 @@ class Literature extends Model
     protected $fillable = [
         'name', 'url', 'image_url', 'status', 'area_id', 'order'
     ];
+
+    public function area()
+    {
+        return $this->belongsTo(Area::class);
+    }
 }

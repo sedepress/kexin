@@ -17,4 +17,9 @@ class Area extends Model
     {
         return $this->belongsTo(Area::class, 'id', 'parent_id');
     }
+
+    public function literatures()
+    {
+        return $this->hasMany(Literature::class);
+    }
 }
