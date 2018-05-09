@@ -17,7 +17,7 @@ class IntellectualRequest extends FormRequest
                 break;
             case 'PATCH':
                 return [
-                    'status' => 'required|in:yes,no',
+                    'status' => 'required|in:up,down',
                 ];
                 break;
         }

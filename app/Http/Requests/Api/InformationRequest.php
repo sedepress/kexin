@@ -15,12 +15,12 @@ class InformationRequest extends FormRequest
                     'image_url' => 'required',
                 ];
                 break;
-            case 'PATCH':
+            case 'PUT':
                 return [
                     'status' => 'required|in:yes,no',
                 ];
                 break;
-            case 'PUT':
+            case 'PATCH':
                 return [
                     'status' => 'required|in:up,down',
                 ];

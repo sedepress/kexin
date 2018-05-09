@@ -25,6 +25,16 @@ $api->version('v1', [
         'limit' => config('api.rate_limits.sign.limit'),
         'expires' => config('api.rate_limits.sign.expires'),
     ], function($api) {
+        //科学文献
+        $api->group(['prefix' => 'literatures'], function ($api) {
+            $api->get('/', 'LiteratureController@index');
+            $api->get('/export', 'LiteratureController@export');
+            $api->post('/import', 'LiteratureController@import');
+            $api->post('/', 'LiteratureController@store');
+            $api->post('/{literature}', 'LiteratureController@update');
+            $api->delete('/{literature}', 'LiteratureController@destroy');
+            $api->patch('/{literature}', 'LiteratureController@toggle');
+        });
         // 后台登录
         $api->post('authorizations', 'AuthorizationsController@store')
             ->name('api.authorizations.store');
@@ -42,6 +52,7 @@ $api->version('v1', [
             //地区相关
             $api->group(['prefix' => 'areas'], function ($api) {
                 $api->get('/{area}', 'AreaController@index');
+                $api->get('/{area}/export', 'AreaController@export');
                 $api->get('first', 'AreaController@first');
                 $api->get('second/{area}', 'AreaController@second');
                 $api->get('three/{area}', 'AreaController@three');
@@ -53,14 +64,7 @@ $api->version('v1', [
                 $api->put('/{declaration_category}', 'DeclarationCategoryController@update');
                 $api->delete('/{declaration_category}', 'DeclarationCategoryController@delete');
             });
-            //科学文献
-            $api->group(['prefix' => 'literatures'], function ($api) {
-                $api->get('/', 'LiteratureController@index');
-                $api->post('/', 'LiteratureController@store');
-                $api->post('/{literature}', 'LiteratureController@update');
-                $api->delete('/{literature}', 'LiteratureController@destroy');
-                $api->patch('/{literature}', 'LiteratureController@toggle');
-            });
+
             //知识产权
             $api->group(['prefix' => 'intellectuals'], function ($api) {
                 $api->get('/', 'IntellectualController@index');
@@ -69,14 +73,16 @@ $api->version('v1', [
                 $api->delete('/{intellectual}', 'IntellectualController@destroy');
                 $api->patch('/{intellectual}', 'IntellectualController@toggle');
             });
+            //检验检测
+
             //资讯中心
             $api->group(['prefix' => 'informations'], function ($api) {
                 $api->get('/', 'InformationController@index');
                 $api->post('/', 'InformationController@store');
                 $api->post('/{information}', 'InformationController@update');
                 $api->delete('/{information}', 'InformationController@destroy');
-                $api->put('/{information}', 'InformationController@toggle');
-                $api->patch('/{information}', 'InformationController@status');
+                $api->patch('/{information}', 'InformationController@toggle');
+                $api->put('/{information}', 'InformationController@status');
             });
         });
     });

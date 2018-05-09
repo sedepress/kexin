@@ -11,6 +11,7 @@
         "fideloper/proxy": "~3.3",
         "laravel/framework": "5.5.*",
         "laravel/tinker": "~1.0",
+        "maatwebsite/excel": "2.*",
         "liyu/dingo-serializer-switch": "^0.3.0",
         "socialiteproviders/weixin": "^4.0",
         "summerblue/administrator": "~1.1",

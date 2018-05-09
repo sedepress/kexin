@@ -10,4 +10,10 @@ class Information extends Model
     protected $fillable = [
         'title', 'content', 'publisher', 'image_url', 'status', 'order'
     ];
+
+    public function getStatusAttribute($value)
+    {
+        $status = [1 => '有效', 0 => '无效'];
+        return $status[$value];
+    }
 }

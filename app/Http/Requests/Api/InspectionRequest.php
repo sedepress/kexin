@@ -2,19 +2,11 @@
 
 namespace App\Http\Requests\Api;
 
-class LiteratureRequest extends FormRequest
+class InspectionRequest extends FormRequest
 {
     public function rules()
     {
         switch($this->method()) {
-            case 'GET':
-                return [
-                    'name' => 'string',
-                    'id' => 'integer',
-                    'status' => 'in:1,0',
-                    'area_id' => 'integer',
-                ];
-                break;
             case 'POST':
                 return [
                     'name' => 'required|string',

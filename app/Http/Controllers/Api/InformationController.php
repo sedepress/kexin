@@ -29,8 +29,9 @@ class InformationController extends Controller
         $maxOrder = Information::max('order');
         if (!$maxOrder) {
             $maxOrder = 1;
+        } else {
+            $maxOrder += 1;
         }
-        $maxOrder += 1;
 
         $Information->order = $maxOrder;
 

@@ -20,13 +20,11 @@ class AreaController extends Controller
 
     public function second(Area $area)
     {
-        $data = Area::find($area->id);
-        return $this->response->item($data, new AreaTransformer());
+        return $this->response->item($area, new AreaTransformer());
     }
 
     public function three(Area $area)
     {
-        $data = Area::find($area->id);
-        return $this->response->item($data, new AreaTransformer());
+        return $this->response->item($area, new AreaTransformer());
     }
 }

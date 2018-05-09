@@ -29,8 +29,9 @@ class IntellectualController extends Controller
         $maxOrder = Intellectual::max('order');
         if (!$maxOrder) {
             $maxOrder = 1;
+        } else {
+            $maxOrder += 1;
         }
-        $maxOrder += 1;
 
         $Intellectual->order = $maxOrder;
 
