@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Api;
 
-class InspectionRequest extends FormRequest
+class PermitRequest extends FormRequest
 {
     public function rules()
     {

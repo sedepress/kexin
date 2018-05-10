@@ -2,24 +2,24 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Link;
-use App\Transformers\LinkTransformer;
-use App\Http\Requests\Api\LinkRequest;
+use App\Models\Mail;
+use App\Transformers\MailTransformer;
+use App\Http\Requests\Api\MailRequest;
 use App\Handlers\ImageUploadHandler;
 use Illuminate\Http\Request;
 use Excel,Validator,Response;
 
-class LinkController extends Controller
+class MailController extends Controller
 {
-    public function index(LinkRequest $request)
+    public function index(MailRequest $request)
     {
-        $links = $this->search($request->all())->orderBy('order')->paginate(10);
-        return $this->response->paginator($links, new LinkTransformer());
+        $mails = $this->search($request->all())->orderBy('order')->paginate(10);
+        return $this->response->paginator($mails, new MailTransformer());
     }
 
     protected function search($data)
     {
-        $links = Link::where(function($query) use ($data){
+        $mails = Mail::where(function($query) use ($data){
                 if(isset($data['name'])){
                     $name = '%'.$data['name'].'%';
                     $query->where('name', 'like', $name);
@@ -36,39 +36,39 @@ class LinkController extends Controller
                 }
             });
 
-        return $links;
+        return $mails;
     }
 
-    public function store(LinkRequest $request, ImageUploadHandler $uploader, Link $link)
+    public function store(MailRequest $request, ImageUploadHandler $uploader, Mail $mail)
     {
-        $link->fill($request->all());
+        $mail->fill($request->all());
 
         if ($request->image_url) {
-            $result = $uploader->save($request->image_url, 'Links', 2018);
+            $result = $uploader->save($request->image_url, 'Mails', 2018);
             if ($result) {
-                $link->image_url = $result['path'];
+                $mail->image_url = $result['path'];
             }
         }
 
-        $link->save();
+        $mail->save();
 
-        return $this->response->item($link, new LinkTransformer())
+        return $this->response->item($mail, new MailTransformer())
             ->setStatusCode(201);
     }
 
-    public function update(LinkRequest $request, ImageUploadHandler $uploader, Link $link)
+    public function update(MailRequest $request, ImageUploadHandler $uploader, Mail $mail)
     {
         $data = $request->all();
 
         if ($request->image_url) {
-            $result = $uploader->save($request->image_url, 'Links', $link->id);
+            $result = $uploader->save($request->image_url, 'Mails', $mail->id);
             if ($result) {
                 $data['image_url'] = $result['path'];
             }
         }
 
         //切割旧图地址获取到图片需要的信息
-        $oldImg = explode('/',$link->image_url);
+        $oldImg = explode('/',$mail->image_url);
 
         //旧图片名称
         $oldImgData = $oldImg[8];
@@ -76,45 +76,45 @@ class LinkController extends Controller
         //获取旧图片的绝对路径
         $oldImgPath = $result['upload_path'].'/'.$oldImgData;
 
-        $link->update($data);
+        $mail->update($data);
 
-        if($link->update($data)&&$oldImgPath!=null){
-            unlink($oldImgPath);
+        if($mail->update($data)&&$oldImgPath!=null){
+            unmail($oldImgPath);
         }
-        return $this->response->item($link, new LinkTransformer());
+        return $this->response->item($mail, new MailTransformer());
     }
 
-    public function destroy(Link $link)
+    public function destroy(Mail $mail)
     {
-        $oldImg = explode('/',$link->image_url);
+        $oldImg = explode('/',$mail->image_url);
         unset($oldImg[0], $oldImg[1], $oldImg[2]);
         $upload_path = public_path() . '/' . implode('/', $oldImg);
-        unlink($upload_path);
-        $link->delete();
+        unmail($upload_path);
+        $mail->delete();
         return $this->response->noContent();
     }
 
-    public function toggle(LinkRequest $request, Link $link)
+    public function toggle(MailRequest $request, Mail $mail)
     {
         $status = $request->status;
 
-        $maxOrder = Link::max('order');
-        $minOrder = Link::min('order');
+        $maxOrder = Mail::max('order');
+        $minOrder = Mail::min('order');
 
-        if ($status == 'up' && $link->order != $minOrder) {
-            $up = Link::where('order', '<', $link->order)->orderBy('order', 'desc')->first();
-            list($link->order, $up->order) = [$up->order, $link->order];
+        if ($status == 'up' && $mail->order != $minOrder) {
+            $up = Mail::where('order', '<', $mail->order)->orderBy('order', 'desc')->first();
+            list($mail->order, $up->order) = [$up->order, $mail->order];
             $up->update();
-        } elseif ($status == 'down' && $link->order != $maxOrder) {
-            $down = Link::where('order', '>', $link->order)->orderBy('order', 'asc')->first();
-            list($link->order, $down->order) = [$down->order, $link->order];
+        } elseif ($status == 'down' && $mail->order != $maxOrder) {
+            $down = Mail::where('order', '>', $mail->order)->orderBy('order', 'asc')->first();
+            list($mail->order, $down->order) = [$down->order, $mail->order];
             $down->update();
         } else {
             return;
         }
-        $link->update();
+        $mail->update();
 
-        return $this->response->item($link, new LinkTransformer());
+        return $this->response->item($mail, new MailTransformer());
     }
 
     protected function export(Request $request)
@@ -130,15 +130,15 @@ class LinkController extends Controller
             $errors = $validator->errors();
             return Response::json($errors);
         }else{
-            $links = $this->search($data)->orderBy('order')->get();
+            $mails = $this->search($data)->orderBy('order')->get();
             $export_data[] = ['编号ID', '名称', '链接', '图标', '链接状态'];
-            foreach ($links as $link) {
-                $link = $link->simpleInfo();
-                $export_data[] = $link;
+            foreach ($mails as $mail) {
+                $mail = $mail->simpleInfo();
+                $export_data[] = $mail;
             }
 
             Excel::create('友情链接',function($excel) use($export_data){
-                $excel->sheet('Link',function($sheet) use($export_data){
+                $excel->sheet('Mail',function($sheet) use($export_data){
                     $sheet->rows($export_data);
                 });
             })->export('xls');
@@ -153,7 +153,7 @@ class LinkController extends Controller
             $data = $reader->all()->toArray();
             foreach ($data as $v) {
                 $info = ['name' => $v['名称'], 'url' => $v['链接']];
-                Link::create($info);
+                Mail::create($info);
             }
         });
     }

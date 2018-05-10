@@ -4,25 +4,20 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Other extends Model
+class Tool extends Model
 {
-    protected $table = 'others';
+    protected $table = 'tools';
     protected $fillable = [
-        'name', 'url', 'image_url', 'status', 'area_id', 'order'
+        'name', 'url', 'image_url', 'status', 'order'
     ];
 
     public static function boot()
     {
         parent::boot();
         self::creating(function ($model) {
-            $maxOrder = Other::max('order');
+            $maxOrder = Tool::max('order');
             $model->order = $maxOrder + 1 ?? 1;
         });
-    }
-
-    public function area()
-    {
-        return $this->belongsTo(Area::class);
     }
 
     public function getStatusAttribute($value)
@@ -33,9 +28,8 @@ class Other extends Model
 
     public function simpleInfo()
     {
-        $need_data = ['id', 'area_status', 'image_url', 'name', 'url', 'status'];
+        $need_data = ['id','image_url', 'name', 'url', 'status'];
         $info = $this->toArray();
-        $info['area_status'] = $this->area->level;
         $data = array_only($info, $need_data);
 
         return $data;

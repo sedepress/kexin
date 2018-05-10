@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Api;
 
-class InspectionRequest extends FormRequest
+class GovernmentRequest extends FormRequest
 {
     public function rules()
     {

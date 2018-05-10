@@ -10,4 +10,9 @@ class DeclarationCategory extends Model
     protected $fillable = [
         'name',
     ];
+
+    public function declatations()
+    {
+        return $this->hasMany(Declaration::class);
+    }
 }

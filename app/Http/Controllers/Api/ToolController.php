@@ -2,24 +2,24 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Link;
-use App\Transformers\LinkTransformer;
-use App\Http\Requests\Api\LinkRequest;
+use App\Models\Tool;
+use App\Transformers\ToolTransformer;
+use App\Http\Requests\Api\ToolRequest;
 use App\Handlers\ImageUploadHandler;
 use Illuminate\Http\Request;
 use Excel,Validator,Response;
 
-class LinkController extends Controller
+class ToolController extends Controller
 {
-    public function index(LinkRequest $request)
+    public function index(ToolRequest $request)
     {
-        $links = $this->search($request->all())->orderBy('order')->paginate(10);
-        return $this->response->paginator($links, new LinkTransformer());
+        $tools = $this->search($request->all())->orderBy('order')->paginate(10);
+        return $this->response->paginator($tools, new ToolTransformer());
     }
 
     protected function search($data)
     {
-        $links = Link::where(function($query) use ($data){
+        $tools = Tool::where(function($query) use ($data){
                 if(isset($data['name'])){
                     $name = '%'.$data['name'].'%';
                     $query->where('name', 'like', $name);
@@ -36,39 +36,39 @@ class LinkController extends Controller
                 }
             });
 
-        return $links;
+        return $tools;
     }
 
-    public function store(LinkRequest $request, ImageUploadHandler $uploader, Link $link)
+    public function store(ToolRequest $request, ImageUploadHandler $uploader, Tool $tool)
     {
-        $link->fill($request->all());
+        $tool->fill($request->all());
 
         if ($request->image_url) {
-            $result = $uploader->save($request->image_url, 'Links', 2018);
+            $result = $uploader->save($request->image_url, 'Tools', 2018);
             if ($result) {
-                $link->image_url = $result['path'];
+                $tool->image_url = $result['path'];
             }
         }
 
-        $link->save();
+        $tool->save();
 
-        return $this->response->item($link, new LinkTransformer())
+        return $this->response->item($tool, new ToolTransformer())
             ->setStatusCode(201);
     }
 
-    public function update(LinkRequest $request, ImageUploadHandler $uploader, Link $link)
+    public function update(ToolRequest $request, ImageUploadHandler $uploader, Tool $tool)
     {
         $data = $request->all();
 
         if ($request->image_url) {
-            $result = $uploader->save($request->image_url, 'Links', $link->id);
+            $result = $uploader->save($request->image_url, 'Tools', $tool->id);
             if ($result) {
                 $data['image_url'] = $result['path'];
             }
         }
 
         //切割旧图地址获取到图片需要的信息
-        $oldImg = explode('/',$link->image_url);
+        $oldImg = explode('/',$tool->image_url);
 
         //旧图片名称
         $oldImgData = $oldImg[8];
@@ -76,45 +76,45 @@ class LinkController extends Controller
         //获取旧图片的绝对路径
         $oldImgPath = $result['upload_path'].'/'.$oldImgData;
 
-        $link->update($data);
+        $tool->update($data);
 
-        if($link->update($data)&&$oldImgPath!=null){
-            unlink($oldImgPath);
+        if($tool->update($data)&&$oldImgPath!=null){
+            untool($oldImgPath);
         }
-        return $this->response->item($link, new LinkTransformer());
+        return $this->response->item($tool, new ToolTransformer());
     }
 
-    public function destroy(Link $link)
+    public function destroy(Tool $tool)
     {
-        $oldImg = explode('/',$link->image_url);
+        $oldImg = explode('/',$tool->image_url);
         unset($oldImg[0], $oldImg[1], $oldImg[2]);
         $upload_path = public_path() . '/' . implode('/', $oldImg);
-        unlink($upload_path);
-        $link->delete();
+        untool($upload_path);
+        $tool->delete();
         return $this->response->noContent();
     }
 
-    public function toggle(LinkRequest $request, Link $link)
+    public function toggle(ToolRequest $request, Tool $tool)
     {
         $status = $request->status;
 
-        $maxOrder = Link::max('order');
-        $minOrder = Link::min('order');
+        $maxOrder = Tool::max('order');
+        $minOrder = Tool::min('order');
 
-        if ($status == 'up' && $link->order != $minOrder) {
-            $up = Link::where('order', '<', $link->order)->orderBy('order', 'desc')->first();
-            list($link->order, $up->order) = [$up->order, $link->order];
+        if ($status == 'up' && $tool->order != $minOrder) {
+            $up = Tool::where('order', '<', $tool->order)->orderBy('order', 'desc')->first();
+            list($tool->order, $up->order) = [$up->order, $tool->order];
             $up->update();
-        } elseif ($status == 'down' && $link->order != $maxOrder) {
-            $down = Link::where('order', '>', $link->order)->orderBy('order', 'asc')->first();
-            list($link->order, $down->order) = [$down->order, $link->order];
+        } elseif ($status == 'down' && $tool->order != $maxOrder) {
+            $down = Tool::where('order', '>', $tool->order)->orderBy('order', 'asc')->first();
+            list($tool->order, $down->order) = [$down->order, $tool->order];
             $down->update();
         } else {
             return;
         }
-        $link->update();
+        $tool->update();
 
-        return $this->response->item($link, new LinkTransformer());
+        return $this->response->item($tool, new ToolTransformer());
     }
 
     protected function export(Request $request)
@@ -130,15 +130,15 @@ class LinkController extends Controller
             $errors = $validator->errors();
             return Response::json($errors);
         }else{
-            $links = $this->search($data)->orderBy('order')->get();
+            $tools = $this->search($data)->orderBy('order')->get();
             $export_data[] = ['编号ID', '名称', '链接', '图标', '链接状态'];
-            foreach ($links as $link) {
-                $link = $link->simpleInfo();
-                $export_data[] = $link;
+            foreach ($tools as $tool) {
+                $tool = $tool->simpleInfo();
+                $export_data[] = $tool;
             }
 
             Excel::create('友情链接',function($excel) use($export_data){
-                $excel->sheet('Link',function($sheet) use($export_data){
+                $excel->sheet('Tool',function($sheet) use($export_data){
                     $sheet->rows($export_data);
                 });
             })->export('xls');
@@ -153,7 +153,7 @@ class LinkController extends Controller
             $data = $reader->all()->toArray();
             foreach ($data as $v) {
                 $info = ['name' => $v['名称'], 'url' => $v['链接']];
-                Link::create($info);
+                Tool::create($info);
             }
         });
     }

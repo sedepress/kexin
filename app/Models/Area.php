@@ -23,6 +23,36 @@ class Area extends Model
         return $this->hasMany(Literature::class);
     }
 
+    public function declarations()
+    {
+        return $this->hasMany(Declaration::class);
+    }
+
+    public function inspections()
+    {
+        return $this->hasMany(Inspection::class);
+    }
+
+    public function intellectuals()
+    {
+        return $this->hasMany(Intellectual::class);
+    }
+
+    public function others()
+    {
+        return $this->hasMany(Other::class);
+    }
+
+    public function permits()
+    {
+        return $this->hasMany(Permit::class);
+    }
+
+    public function services()
+    {
+        return $this->hasMany(Service::class);
+    }
+
     public function getLevelAttribute($value)
     {
         switch ($value)

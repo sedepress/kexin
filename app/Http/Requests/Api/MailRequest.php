@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Api;
 
-class InspectionRequest extends FormRequest
+class MailRequest extends FormRequest
 {
     public function rules()
     {
@@ -12,7 +12,6 @@ class InspectionRequest extends FormRequest
                     'name' => 'string',
                     'id' => 'integer',
                     'status' => 'in:1,0',
-                    'area_id' => 'integer',
                 ];
                 break;
             case 'POST':
@@ -20,7 +19,6 @@ class InspectionRequest extends FormRequest
                     'name' => 'required|string',
                     'url' => 'required|string',
                     'image_url' => 'required',
-                    'area_id' => 'required|integer',
                 ];
                 break;
             case 'PATCH':
@@ -37,7 +35,6 @@ class InspectionRequest extends FormRequest
             'name' => '名称',
             'url' => '网址',
             'image_url' => '图标url',
-            'area_id' => '区域id',
         ];
     }
 }

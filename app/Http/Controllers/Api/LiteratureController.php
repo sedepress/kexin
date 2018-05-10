@@ -14,7 +14,7 @@ class LiteratureController extends Controller
 {
     public function index(LiteratureRequest $request)
     {
-        $literatures = $this->search($request->all())->orderBy('order')->paginate(2);
+        $literatures = $this->search($request->all())->orderBy('order')->paginate(10);
         return $this->response->paginator($literatures, new LiteratureTransformer());
     }
 
