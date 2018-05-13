@@ -3,11 +3,12 @@
 namespace App\Transformers;
 
 use App\Models\Area;
+use App\Models\Mail;
 use League\Fractal\TransformerAbstract;
 
 class AreaTransformer extends TransformerAbstract
 {
-    protected $availableIncludes = ['children', 'literature'];
+    protected $availableIncludes = ['children', 'literature', 'mail'];
 
     public function transform(Area $area)
     {
@@ -27,6 +28,11 @@ class AreaTransformer extends TransformerAbstract
     public function includeLiterature(Area $area)
     {
         return $this->collection($area->literatures()->get(), new LiteratureTransformer());
+    }
+
+    public function includeMail(Area $area)
+    {
+        return $this->collection($area->mail(), new MailTransformer());
     }
 
 }

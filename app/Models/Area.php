@@ -53,6 +53,11 @@ class Area extends Model
         return $this->hasMany(Service::class);
     }
 
+    public function mail()
+    {
+        return Mail::all();
+    }
+
     public function getLevelAttribute($value)
     {
         switch ($value)

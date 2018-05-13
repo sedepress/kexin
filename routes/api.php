@@ -25,6 +25,23 @@ $api->version('v1', [
         'limit' => config('api.rate_limits.sign.limit'),
         'expires' => config('api.rate_limits.sign.expires'),
     ], function($api) {
+        $api->group(['prefix' => 'website_categories'], function ($api) {
+            $api->get('/', 'WebsiteCategoryController@index');
+            $api->get('/lists', 'WebsiteCategoryController@lists');
+            $api->post('/', 'WebsiteCategoryController@store');
+            $api->put('/{website_category}', 'WebsiteCategoryController@update');
+            $api->delete('/{website_category}', 'WebsiteCategoryController@delete');
+        });
+        //网站
+        $api->group(['prefix' => 'websites'], function ($api) {
+            $api->get('/', 'WebsiteController@index');
+            $api->get('/export', 'WebsiteController@export');
+            $api->post('/import', 'WebsiteController@import');
+            $api->post('/', 'WebsiteController@store');
+            $api->post('/{website}', 'WebsiteController@update');
+            $api->delete('/{website}', 'WebsiteController@destroy');
+            $api->patch('/{website}', 'WebsiteController@toggle');
+        });
         //科学文献
         $api->group(['prefix' => 'literatures'], function ($api) {
             $api->get('/', 'LiteratureController@index');
