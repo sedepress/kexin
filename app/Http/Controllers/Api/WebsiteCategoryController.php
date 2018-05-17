@@ -10,12 +10,15 @@ use App\Models\Area;
 use App\Models\Website;
 use App\Models\Information;
 use Illuminate\Http\Request;
+use Response;
 
 class WebsiteCategoryController extends Controller
 {
     public function index()
     {
-        return $this->response->collection(WebsiteCategory::all(), new WebsiteCategoryTransformer());
+        $data = WebsiteCategory::all();
+        $data = Helper::getTree($data);
+        return Response::json($data);
     }
 
     public function lists(Request $request)

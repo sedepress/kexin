@@ -33,6 +33,7 @@ class InformationController extends Controller
             $maxOrder += 1;
         }
 
+        $Information->status = true;
         $Information->order = $maxOrder;
 
         $Information->save();
