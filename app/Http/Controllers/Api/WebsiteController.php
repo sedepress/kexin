@@ -112,16 +112,23 @@ class WebsiteController extends Controller
     public function toggle(WebsiteRequest $request, Website $website)
     {
         $status = $request->status;
+        $website_category_id = $website->website_category_id;
 
-        $maxOrder = Website::max('order');
-        $minOrder = Website::min('order');
+        $maxOrder = Website::where('website_category_id', $website_category_id)->max('order');
+        $minOrder = Website::where('website_category_id', $website_category_id)->min('order');
 
         if ($status == 'up' && $website->order != $minOrder) {
-            $up = Website::where('order', '<', $website->order)->orderBy('order', 'desc')->first();
+            $up = Website::where([
+                ['order', '<', $website->order],
+                ['website_category_id', $website_category_id],
+            ])->orderBy('order', 'desc')->first();
             list($website->order, $up->order) = [$up->order, $website->order];
             $up->update();
         } elseif ($status == 'down' && $website->order != $maxOrder) {
-            $down = Website::where('order', '>', $website->order)->orderBy('order', 'asc')->first();
+            $down = Website::where([
+                ['order', '>', $website->order],
+                ['website_category_id', $website_category_id],
+            ])->orderBy('order', 'asc')->first();
             list($website->order, $down->order) = [$down->order, $website->order];
             $down->update();
         } else {
@@ -155,7 +162,7 @@ class WebsiteController extends Controller
         Excel::load($excel_file_path, function($reader) {
             $data = $reader->all()->toArray();
             foreach ($data as $v) {
-                $info = ['name' => $v['名称'], 'url' => $v['链接']];
+                $info = ['name' => $v['名称'], 'url' => $v['链接'], 'website_category_id' => $v['分类']];
                 Website::create($info);
             }
         });

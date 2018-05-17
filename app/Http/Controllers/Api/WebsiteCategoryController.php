@@ -23,7 +23,7 @@ class WebsiteCategoryController extends Controller
         $area_id = $request->area_id;
         //正式环境需要修改id
         $data = WebsiteCategory::with(['websites' => function ($query) use ($area_id) {
-            $query->whereAreaId($area_id);
+            $query->whereIn('area_id', [$area_id, 0]);
         }])->whereNotIn('id', [1,9])->get();
         $data = Helper::getTree($data);
         $area_type = Area::find($area_id)->value('level');

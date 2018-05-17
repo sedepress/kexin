@@ -169,6 +169,15 @@ $api->version('v1', [
         // 删除token
         $api->delete('authorizations/current', 'AuthorizationsController@destroy')
             ->name('api.authorizations.destroy');
+        //资讯中心
+        $api->group(['prefix' => 'informations'], function ($api) {
+            $api->get('/', 'InformationController@index');
+            $api->post('/', 'InformationController@store');
+            $api->post('/{information}', 'InformationController@update');
+            $api->delete('/{information}', 'InformationController@destroy');
+            $api->patch('/{information}', 'InformationController@toggle');
+            $api->put('/{information}', 'InformationController@status');
+        });
         // 需要 token 验证的接口
         $api->group(['middleware' => 'api.auth'], function($api) {
             //地区相关
@@ -185,16 +194,6 @@ $api->version('v1', [
                 $api->post('/', 'DeclarationCategoryController@store');
                 $api->put('/{declaration_category}', 'DeclarationCategoryController@update');
                 $api->delete('/{declaration_category}', 'DeclarationCategoryController@delete');
-            });
-
-            //资讯中心
-            $api->group(['prefix' => 'informations'], function ($api) {
-                $api->get('/', 'InformationController@index');
-                $api->post('/', 'InformationController@store');
-                $api->post('/{information}', 'InformationController@update');
-                $api->delete('/{information}', 'InformationController@destroy');
-                $api->patch('/{information}', 'InformationController@toggle');
-                $api->put('/{information}', 'InformationController@status');
             });
         });
     });

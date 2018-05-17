@@ -9,51 +9,43 @@ use App\Handlers\ImageUploadHandler;
 
 class InformationController extends Controller
 {
-    public function index(Information $Information)
+    public function index(Information $information)
     {
-        $Informations = $Information->orderBy('order')->paginate(10);
-        return $this->response->paginator($Informations, new InformationTransformer());
+        $informations = $information->orderBy('order')->paginate(10);
+        return $this->response->paginator($informations, new InformationTransformer());
     }
 
-    public function store(InformationRequest $request, ImageUploadHandler $uploader, Information $Information)
+    public function store(InformationRequest $request, ImageUploadHandler $uploader, Information $information)
     {
-        $Information->fill($request->all());
+        $information->fill($request->all());
 
         if ($request->image_url) {
             $result = $uploader->save($request->image_url, 'Informations', 2018);
             if ($result) {
-                $Information->image_url = $result['path'];
+                $information->image_url = $result['path'];
             }
         }
 
-        $maxOrder = Information::max('order');
-        if (!$maxOrder) {
-            $maxOrder = 1;
-        } else {
-            $maxOrder += 1;
-        }
+        $information->status = true;
+        $information->save();
 
-        $Information->order = $maxOrder;
-
-        $Information->save();
-
-        return $this->response->item($Information, new InformationTransformer())
+        return $this->response->item($information, new InformationTransformer())
             ->setStatusCode(201);
     }
 
-    public function update(InformationRequest $request, ImageUploadHandler $uploader, Information $Information)
+    public function update(InformationRequest $request, ImageUploadHandler $uploader, Information $information)
     {
         $data = $request->all();
 
         if ($request->image_url) {
-            $result = $uploader->save($request->image_url, 'Informations', $Information->id);
+            $result = $uploader->save($request->image_url, 'Informations', $information->id);
             if ($result) {
                 $data['image_url'] = $result['path'];
             }
         }
 
         //切割旧图地址获取到图片需要的信息
-        $oldImg = explode('/',$Information->image_url);
+        $oldImg = explode('/',$information->image_url);
 
         //旧图片名称
         $oldImgData = $oldImg[8];
@@ -61,21 +53,21 @@ class InformationController extends Controller
         //获取旧图片的绝对路径
         $oldImgPath = $result['upload_path'].'/'.$oldImgData;
 
-        $Information->update($data);
+        $information->update($data);
 
-        if($Information->update($data)&&$oldImgPath!=null){
+        if($information->update($data)&&$oldImgPath!=null){
             unlink($oldImgPath);
         }
-        return $this->response->item($Information, new InformationTransformer());
+        return $this->response->item($information, new InformationTransformer());
     }
 
-    public function destroy(Information $Information)
+    public function destroy(Information $information)
     {
-        $oldImg = explode('/',$Information->image_url);
+        $oldImg = explode('/',$information->image_url);
         unset($oldImg[0], $oldImg[1], $oldImg[2]);
         $upload_path = public_path() . '/' . implode('/', $oldImg);
         unlink($upload_path);
-        $Information->delete();
+        $information->delete();
         return $this->response->noContent();
     }
 
@@ -102,11 +94,11 @@ class InformationController extends Controller
         return $this->response->item($information, new InformationTransformer());
     }
 
-    public function status(InformationRequest $request, Information $Information)
+    public function status(InformationRequest $request, Information $information)
     {
-        $Information->status = $request->status == 'yes' ? true : false;
-        $Information->update();
+        $information->status = $request->status == 'yes' ? true : false;
+        $information->update();
 
-        return $this->response->item($Information, new InformationTransformer());
+        return $this->response->item($information, new InformationTransformer());
     }
 }

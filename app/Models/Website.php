@@ -16,7 +16,7 @@ class Website extends Model
     {
         parent::boot();
         self::creating(function ($model) {
-            $maxOrder = Website::max('order');
+            $maxOrder = Website::where('website_category_id', $model->website_category_id)->max('order');
             $model->order = $maxOrder + 1 ?? 1;
         });
     }
