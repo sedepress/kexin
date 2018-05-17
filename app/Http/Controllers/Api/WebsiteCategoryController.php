@@ -10,12 +10,38 @@ use App\Models\Area;
 use App\Models\Website;
 use App\Models\Information;
 use Illuminate\Http\Request;
+use Response;
 
 class WebsiteCategoryController extends Controller
 {
     public function index()
     {
-        return $this->response->collection(WebsiteCategory::all(), new WebsiteCategoryTransformer());
+        $data = WebsiteCategory::all();
+        $data = Helper::getTree($data);
+        return Response::json($data);
+    }
+
+    public function left(Request $request)
+    {
+        $area_id = $request->area_id;
+        //正式环境需要修改id
+        $data = WebsiteCategory::with(['websites' => function ($query) use ($area_id) {
+            $query->whereIn('area_id', [$area_id, 0]);
+        }])->whereIn('id', [14,15,16])->get()->toArray();
+
+        $informations = Information::limit(10)->get();
+        $informs = WebsiteCategory::select('id', 'name')->find(2);
+        $informs['websites'] = $informations;
+        array_unshift($data, $informs);
+
+        return $data;
+    }
+
+    public function right()
+    {
+        $data = WebsiteCategory::with('websites')->find(17);
+
+        return $data;
     }
 
     public function lists(Request $request)
@@ -24,35 +50,41 @@ class WebsiteCategoryController extends Controller
         //正式环境需要修改id
         $data = WebsiteCategory::with(['websites' => function ($query) use ($area_id) {
             $query->whereIn('area_id', [$area_id, 0]);
-        }])->whereNotIn('id', [1,9])->get();
+        }])->whereNotIn('id', [1,2,14,15,16,17])->get();
         $data = Helper::getTree($data);
-        $area_type = Area::find($area_id)->value('level');
+        $area_type = Area::whereId($area_id)->value('level');
         $area_lists = [];
-        $area_lists['country'] = Website::whereAreaId(1)->get();
+        $area_lists['country']['country_name'] = Area::whereId(1)->value('name');
+        $area_lists['country']['websites'] = Website::whereAreaId(1)->get();
 
         switch ($area_type)
         {
             case '省':
-                $area_lists['province'] = Website::whereAreaId($area_id)->get();
+                $area_lists['province']['province_name'] = Area::whereId($area_id)->value('name');
+                $area_lists['province']['websites'] = Website::whereAreaId($area_id)->get();
+                break;
             case '市':
                 $city = Area::find($area_id);
-                $area_lists['province'] = Website::whereAreaId($city->parent_id)->get();
-                $area_lists['city'] = Website::whereAreaId($city->id)->get();
+                $area_lists['province']['province_name'] = Area::whereId($city->parent_id)->value('name');
+                $area_lists['province']['websites'] = Website::whereAreaId($city->parent_id)->get();
+                $area_lists['city']['city_name'] = Area::whereId($city->id)->value('name');
+                $area_lists['city']['websites'] = Website::whereAreaId($city->id)->get();
+                break;
             case '区':
                 $district = Area::find($area_id);
                 $city = Area::find($district->parent_id);
-                $area_lists['province'] = Website::whereAreaId($city->parent_id)->get();
-                $area_lists['city'] = Website::whereAreaId($district->parent_id)->get();
-                $area_lists['district'] = Website::whereAreaId($district->id)->get();
+                $area_lists['province']['province_name'] = Area::whereId($city->parent_id)->value('name');
+                $area_lists['province']['websites'] = Website::whereAreaId($city->parent_id)->get();
+                $area_lists['city']['city_name'] = Area::whereId($district->parent_id)->value('name');
+                $area_lists['city']['websites'] = Website::whereAreaId($district->parent_id)->get();
+                $area_lists['district']['district_name'] = Area::whereId($district->id)->value('name');
+                $area_lists['district']['websites'] = Website::whereAreaId($district->id)->get();
+                break;
         }
 
-        $informations = Information::select('id', 'title', 'image_url')->orderBy('created_at', 'DESC')->limit(10)->get();
         $info = WebsiteCategory::find(1);
         $info['websites'] = $area_lists;
         array_unshift($data, $info);
-        $inform = WebsiteCategory::find(9);
-        $inform['websites'] = $informations;
-        array_push($data, $inform);
 
         return $data;
     }

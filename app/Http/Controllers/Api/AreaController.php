@@ -7,11 +7,6 @@ use App\Transformers\AreaTransformer;
 
 class AreaController extends Controller
 {
-    public function index(Area $area)
-    {
-        return $this->response->item($area, new AreaTransformer());
-    }
-
     public function first()
     {
         $data = Area::find(1);
