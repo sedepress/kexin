@@ -33,6 +33,7 @@ $api->version('v1', [
             ->name('api.socials.authorizations.store');
         //地区相关
         $api->group(['prefix' => 'areas'], function ($api) {
+            $api->get('/', 'AreaController@index');
             $api->get('first/{area}', 'AreaController@first');
             $api->get('second/{area}', 'AreaController@second');
             $api->get('three/{area}', 'AreaController@three');

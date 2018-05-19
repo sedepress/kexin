@@ -7,6 +7,12 @@ use App\Transformers\AreaTransformer;
 
 class AreaController extends Controller
 {
+    public function index()
+    {
+        $data = Area::select('id', 'parent_id', 'name')->get();
+        return $data;
+    }
+
     public function first()
     {
         $data = Area::find(1);
