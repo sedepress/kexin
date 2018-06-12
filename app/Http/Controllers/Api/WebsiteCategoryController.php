@@ -37,31 +37,33 @@ class WebsiteCategoryController extends Controller
         $area_type = Area::whereId($area_id)->value('level');
         $area_lists = [];
         $area_lists['country']['country_name'] = Area::whereId(1)->value('name');
-        $area_lists['country']['websites'] = Website::where([['area_id', 1], ['website_category_id', 16]])->get();
+        $area_lists['country']['websites'] = Website::where([['area_id', 1], ['website_category_id', 16]])->orderBy('order')->get();
 
         switch ($area_type)
         {
             case '省':
                 $area_lists['province']['province_name'] = Area::whereId($area_id)->value('name');
                 $area_lists['province']['websites'] = Website::whereAreaId($area_id)->get();
-                $area_lists['province']['websites'] = Website::where([['area_id', $area_id], ['website_category_id', 16]])->get();
+                $area_lists['province']['websites'] = Website::where([['area_id', $area_id], ['website_category_id', 16]])->orderBy('order')->get();
                 break;
             case '市':
                 $city = Area::find($area_id);
                 $area_lists['province']['province_name'] = Area::whereId($city->parent_id)->value('name');
-                $area_lists['province']['websites'] = Website::where([['area_id', $city->parent_id], ['website_category_id', 16]])->get();
+                $area_lists['province']['websites'] = Website::where([['area_id', $city->parent_id], ['website_category_id', 16]])->orderBy('order')->get();
                 $area_lists['city']['city_name'] = Area::whereId($city->id)->value('name');
-                $area_lists['city']['websites'] = Website::where([['area_id', $city->id], ['website_category_id', 16]])->get();
+                $area_lists['city']['websites'] = Website::where([['area_id', $city->id], ['website_category_id', 16]])->orderBy('order')->get();
+                $area_lists['district']['district_name'] = Area::whereId(($city->id)+1)->value('name');
+                $area_lists['district']['websites'] = Website::where([['area_id', ($city->id)+1], ['website_category_id', 16]])->orderBy('order')->get();
                 break;
             case '区':
                 $district = Area::find($area_id);
                 $city = Area::find($district->parent_id);
                 $area_lists['province']['province_name'] = Area::whereId($city->parent_id)->value('name');
-                $area_lists['province']['websites'] = Website::where([['area_id', $city->parent_id], ['website_category_id', 16]])->get();
+                $area_lists['province']['websites'] = Website::where([['area_id', $city->parent_id], ['website_category_id', 16]])->orderBy('order')->get();
                 $area_lists['city']['city_name'] = Area::whereId($district->parent_id)->value('name');
-                $area_lists['city']['websites'] = Website::where([['area_id', $district->parent_id], ['website_category_id', 16]])->get();
+                $area_lists['city']['websites'] = Website::where([['area_id', $district->parent_id], ['website_category_id', 16]])->orderBy('order')->get();
                 $area_lists['district']['district_name'] = Area::whereId($district->id)->value('name');
-                $area_lists['district']['websites'] = Website::where([['area_id', $district->id], ['website_category_id', 16]])->get();
+                $area_lists['district']['websites'] = Website::where([['area_id', $district->id], ['website_category_id', 16]])->orderBy('order')->get();
                 break;
         }
 
@@ -83,38 +85,42 @@ class WebsiteCategoryController extends Controller
     {
         $area_id = $request->area_id;
         //正式环境需要修改id
-        $data = WebsiteCategory::with(['websites' => function ($query) use ($area_id) {
-            $query->whereIn('area_id', [$area_id, 0]);
+        $area_parent = Area::find($area_id);
+        $area_parent_id = $area_parent->parent->id;
+        $areas = [$area_id, $area_parent_id, 0];
+        $data = WebsiteCategory::with(['websites' => function ($query) use ($areas) {
+            $query->whereIn('area_id', $areas);
         }])->whereNotIn('id', [1,2,14,15,16,17])->get();
         $data = Helper::getTree($data);
         $area_type = Area::whereId($area_id)->value('level');
         $area_lists = [];
         $area_lists['country']['country_name'] = Area::whereId(1)->value('name');
-        $area_lists['country']['websites'] = Website::where([['area_id', 1], ['website_category_id', 1]])->get();
+        $area_lists['country']['websites'] = Website::where([['area_id', 1], ['website_category_id', 1]])->orderBy('order')->get();
 
         switch ($area_type)
         {
             case '省':
                 $area_lists['province']['province_name'] = Area::whereId($area_id)->value('name');
-                $area_lists['province']['websites'] = Website::whereAreaId($area_id)->get();
-                $area_lists['province']['websites'] = Website::where([['area_id', $area_id], ['website_category_id', 1]])->get();
+                $area_lists['province']['websites'] = Website::where([['area_id', $area_id], ['website_category_id', 1]])->orderBy('order')->get();
                 break;
             case '市':
                 $city = Area::find($area_id);
                 $area_lists['province']['province_name'] = Area::whereId($city->parent_id)->value('name');
-                $area_lists['province']['websites'] = Website::where([['area_id', $city->parent_id], ['website_category_id', 1]])->get();
+                $area_lists['province']['websites'] = Website::where([['area_id', $city->parent_id], ['website_category_id', 1]])->orderBy('order')->get();
                 $area_lists['city']['city_name'] = Area::whereId($city->id)->value('name');
-                $area_lists['city']['websites'] = Website::where([['area_id', $city->id], ['website_category_id', 1]])->get();
+                $area_lists['city']['websites'] = Website::where([['area_id', $city->id], ['website_category_id', 1]])->orderBy('order')->get();
+                $area_lists['district']['district_name'] = Area::whereId(($city->id)+1)->value('name');
+                $area_lists['district']['websites'] = Website::where([['area_id', ($city->id)+1], ['website_category_id', 1]])->orderBy('order')->get();
                 break;
             case '区':
                 $district = Area::find($area_id);
                 $city = Area::find($district->parent_id);
                 $area_lists['province']['province_name'] = Area::whereId($city->parent_id)->value('name');
-                $area_lists['province']['websites'] = Website::where([['area_id', $city->parent_id], ['website_category_id', 1]])->get();
+                $area_lists['province']['websites'] = Website::where([['area_id', $city->parent_id], ['website_category_id', 1]])->orderBy('order')->get();
                 $area_lists['city']['city_name'] = Area::whereId($district->parent_id)->value('name');
-                $area_lists['city']['websites'] = Website::where([['area_id', $district->parent_id], ['website_category_id', 1]])->get();
+                $area_lists['city']['websites'] = Website::where([['area_id', $district->parent_id], ['website_category_id', 1]])->orderBy('order')->get();
                 $area_lists['district']['district_name'] = Area::whereId($district->id)->value('name');
-                $area_lists['district']['websites'] = Website::where([['area_id', $district->id], ['website_category_id', 1]])->get();
+                $area_lists['district']['websites'] = Website::where([['area_id', $district->id], ['website_category_id', 1]])->orderBy('order')->get();
                 break;
         }
 
@@ -137,7 +143,6 @@ class WebsiteCategoryController extends Controller
     public function update(WebsiteCategoryRequest $request, WebsiteCategory $website_category)
     {
         $website_category->update($request->all());
-
         return $this->response->item($website_category, new WebsiteCategoryTransformer());
     }
 

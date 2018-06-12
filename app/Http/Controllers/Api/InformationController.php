@@ -6,13 +6,36 @@ use App\Models\Information;
 use App\Transformers\InformationTransformer;
 use App\Http\Requests\Api\InformationRequest;
 use App\Handlers\ImageUploadHandler;
-
+use Illuminate\Http\Request;
 class InformationController extends Controller
 {
-    public function index(Information $information)
+    public function index(Request $request)
     {
-        $informations = $information->orderBy('order')->paginate(10);
+        $data = $request->all();
+        $informations = $this->search($data)->orderBy('order')->paginate(10);
         return $this->response->paginator($informations, new InformationTransformer());
+    }
+
+    protected function search($data)
+    {
+        $informations = Information::where(function($query) use ($data){
+                if(isset($data['title'])){
+                    $name = '%'.$data['title'].'%';
+                    $query->where('title', 'like', $name);
+                }
+            })
+            ->where(function($query) use ($data){
+                if(isset($data['status'])){
+                    $query->whereStatus($data['status']);
+                }
+            });
+
+        return $informations;
+    }
+
+    public function show(Information $information)
+    {
+        return $this->response->item($information, new InformationTransformer());
     }
 
     public function store(InformationRequest $request, ImageUploadHandler $uploader, Information $information)

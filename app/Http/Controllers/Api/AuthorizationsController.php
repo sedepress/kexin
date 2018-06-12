@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\Favorite;
 use Auth;
 use App\Http\Requests\Api\AuthorizationRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Requests\Api\SocialAuthorizationRequest;
 use App\Transformers\UserTransformer;
-
 class AuthorizationsController extends Controller
 {
     public function store(AuthorizationRequest $request)
@@ -95,8 +95,23 @@ class AuthorizationsController extends Controller
         return $this->response->noContent();
     }
 
-    public function me()
+    public function favorites()
     {
-        return $this->response->item($this->user(), new UserTransformer());
+        return $this->user()->websites;
+    }
+
+    public function delFavorites(Favorite $favorite)
+    {
+        $favorite->delete();
+        return $this->response->noContent();
+    }
+
+    public function addFavorites(Request $request, Favorite $favorite)
+    {
+        $favorite->fill($request->all());
+        $favorite->user_id = $this->user()->id;
+        $favorite->icon = 'http://favicon.byi.pw/?url=' . $request->website;
+        $favorite->save();
+        return $favorite;
     }
 }

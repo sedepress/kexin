@@ -31,12 +31,6 @@ class Website extends Model
         return $this->belongsTo(WebsiteCategory::class);
     }
 
-    public function getStatusAttribute($value)
-    {
-        $status = [1 => '有效', 0 => '无效'];
-        return $status[$value];
-    }
-
     public function simpleInfo()
     {
         $need_data = ['id', 'area_status', 'image_url', 'name', 'url', 'status'];

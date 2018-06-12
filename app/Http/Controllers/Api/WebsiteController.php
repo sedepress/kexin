@@ -4,18 +4,26 @@ namespace App\Http\Controllers\Api;
 
 use App\Models\Website;
 use App\Models\Area;
+use Illuminate\Http\Request;
 use App\Transformers\WebsiteTransformer;
 use App\Http\Requests\Api\WebsiteRequest;
 use App\Handlers\ImageUploadHandler;
-use Excel;
+use Excel,DB;
 
 class WebsiteController extends Controller
 {
-    public function index(WebsiteRequest $request)
+    public function index(Request $request)
     {
-        $websites = $this->search($request->all())->orderBy('order')->paginate(10);
+        $data = array_filter($request->all());
+        $data['status'] = $request->status;
+        $websites = $this->search($data)->orderBy('order')->paginate(10);
 
         return $this->response->paginator($websites, new WebsiteTransformer());
+    }
+
+    public function show(Website $website)
+    {
+        return $this->response->item($website, new WebsiteTransformer());
     }
 
     protected function search($data)
@@ -65,6 +73,7 @@ class WebsiteController extends Controller
             }
         }
 
+        $website->status = true;
         $website->save();
 
         return $this->response->item($website, new WebsiteTransformer())
@@ -82,29 +91,29 @@ class WebsiteController extends Controller
             }
         }
 
-        //切割旧图地址获取到图片需要的信息
-        $oldImg = explode('/',$website->image_url);
-
-        //旧图片名称
-        $oldImgData = $oldImg[8];
-
-        //获取旧图片的绝对路径
-        $oldImgPath = $result['upload_path'].'/'.$oldImgData;
+//        //切割旧图地址获取到图片需要的信息
+//        $oldImg = explode('/',$website->image_url);
+//
+//        //旧图片名称
+//        $oldImgData = $oldImg[8];
+//
+//        //获取旧图片的绝对路径
+//        $oldImgPath = $result['uplo   ad_path'].'/'.$oldImgData;
 
         $website->update($data);
 
-        if($website->update($data)&&$oldImgPath!=null){
-            unlink($oldImgPath);
-        }
+//        if($website->update($data)&&$oldImgPath!=null){
+//            unlink($oldImgPath);
+//        }
         return $this->response->item($website, new WebsiteTransformer());
     }
 
     public function destroy(Website $website)
     {
-        $oldImg = explode('/',$website->image_url);
-        unset($oldImg[0], $oldImg[1], $oldImg[2]);
-        $upload_path = public_path() . '/' . implode('/', $oldImg);
-        unlink($upload_path);
+//        $oldImg = explode('/',$website->image_url);
+//        unset($oldImg[0], $oldImg[1], $oldImg[2]);
+//        $upload_path = public_path() . '/' . implode('/', $oldImg);
+//        unlink($upload_path);
         $website->delete();
         return $this->response->noContent();
     }
@@ -139,7 +148,7 @@ class WebsiteController extends Controller
         return $this->response->item($website, new WebsiteTransformer());
     }
 
-    protected function export(WebsiteRequest $request)
+    public function export(WebsiteRequest $request)
     {
         $websites = $this->search($request->all())->orderBy('order')->with('area')->get();
         $export_data[] = ['编号ID', '名称', '链接', '图标', '链接状态', '区域属性'];
@@ -155,16 +164,23 @@ class WebsiteController extends Controller
         })->export('xls');
     }
 
-    protected function import()
+    public function import()
     {
-        $file = $_FILES;
-        $excel_file_path = $file['file']['tmp_name'];
-        Excel::load($excel_file_path, function($reader) {
-            $data = $reader->all()->toArray();
-            foreach ($data as $v) {
-                $info = ['name' => $v['名称'], 'url' => $v['链接'], 'website_category_id' => $v['分类']];
-                Website::create($info);
-            }
-        });
+        DB::beginTransaction();
+        try{
+            $file = $_FILES;
+            $excel_file_path = $file['file']['tmp_name'];
+            Excel::load($excel_file_path, function($reader) {
+                $data = $reader->all()->toArray();
+                foreach ($data as $v) {
+                    $info = ['name' => $v['名称'], 'url' => $v['链接'], 'website_category_id' => $v['分类'], 'area_id' => $v['区域']];
+                    Website::create($info);
+                }
+            });
+            DB::commit();
+        }catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
     }
 }
