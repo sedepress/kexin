@@ -24,6 +24,6 @@ class WebsiteCategory extends Model
 
     public function websites()
     {
-        return $this->hasMany(Website::class);
+        return $this->hasMany(Website::class)->orderBy('order');
     }
 }

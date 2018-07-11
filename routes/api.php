@@ -22,8 +22,6 @@ $api->version('v1', [
 
     $api->group([
         'middleware' => 'api.throttle',
-        'limit' => config('api.rate_limits.sign.limit'),
-        'expires' => config('api.rate_limits.sign.expires'),
     ], function($api) {
         // 后台登录
         $api->post('authorizations', 'AuthorizationsController@store')
@@ -37,6 +35,10 @@ $api->version('v1', [
             $api->get('first/{area}', 'AreaController@first');
             $api->get('second/{area}', 'AreaController@second');
             $api->get('three/{area}', 'AreaController@three');
+            $api->get('/getaid', 'AreaController@getAid');
+            $api->get('/show/{area}', 'AreaController@show');
+            $api->get('three/{area}', 'AreaController@three');
+            $api->get('/ip', 'AreaController@getIp');
         });
         $api->group(['prefix' => 'website_categories'], function ($api) {
             $api->get('/', 'WebsiteCategoryController@index');
